@@ -1,0 +1,16 @@
+# build output
+target/
+*.class
+
+# UI build + toolchain installed by frontend-maven-plugin
+ui/node_modules/
+ui/dist/
+ui/.node/
+ui/.angular/
+
+# IDE / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db

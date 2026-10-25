@@ -1,0 +1,305 @@
+[
+  {
+    "stub_id": "stub_account_create_v1",
+    "description": "Open a USD account. Client-supplied account_id is honoured, otherwise one is generated per session.",
+    "tags": ["core-banking", "accounts"],
+    "request_matcher": {
+      "protocol": "HTTP", "method": "POST", "path": "/api/v1/accounts",
+      "body_jsonpath": { "$.currency": "USD" }
+    },
+    "response_template": {
+      "status_code": 201,
+      "headers": { "Location": "/api/v1/accounts/{{response.body.account_id}}" },
+      "body": {
+        "account_id": "{{request.body.account_id ?: generate.id:ACC}}",
+        "account_holder": "{{request.body.account_holder}}",
+        "balance": "{{request.body.initial_deposit ?: 0}}",
+        "currency": "{{request.body.currency}}",
+        "status": "ACTIVE"
+      }
+    },
+    "state_action": { "op": "PUT", "collection": "accounts", "key": "{{response.body.account_id}}", "value": "{{response.body}}" }
+  },
+  {
+    "stub_id": "stub_account_create_rejected_v1",
+    "description": "Fallback for account creation in any currency other than USD (or none).",
+    "priority": -1,
+    "tags": ["core-banking", "accounts", "negative"],
+    "request_matcher": { "protocol": "HTTP", "method": "POST", "path": "/api/v1/accounts" },
+    "response_template": {
+      "status_code": 422,
+      "body": { "error": "UNSUPPORTED_CURRENCY", "currency": "{{request.body.currency}}", "supported": ["USD"] }
+    }
+  },
+  {
+    "stub_id": "stub_account_get_v1",
+    "description": "Read an account created earlier in the same session.",
+    "tags": ["core-banking", "accounts"],
+    "request_matcher": { "protocol": "HTTP", "method": "GET", "path": "/api/v1/accounts/{id}" },
+    "response_template": { "status_code": 200 },
+    "state_action": { "op": "GET", "collection": "accounts", "key": "{{request.path.id}}" },
+    "not_found_response": {
+      "status_code": 404,
+      "body": { "error": "ACCOUNT_NOT_FOUND", "account_id": "{{request.path.id}}" }
+    }
+  },
+  {
+    "stub_id": "stub_account_summary_v1",
+    "description": "Literal path that must win over /api/v1/accounts/{id}.",
+    "tags": ["core-banking", "accounts"],
+    "request_matcher": { "protocol": "HTTP", "method": "GET", "path": "/api/v1/accounts/summary" },
+    "response_template": {
+      "status_code": 200,
+      "body": { "total_accounts": "{{state.count}}", "session_id": "{{request.session_id}}" }
+    },
+    "state_action": { "op": "LIST", "collection": "accounts" }
+  },
+  {
+    "stub_id": "stub_account_list_v1",
+    "description": "List all accounts in the session.",
+    "tags": ["core-banking", "accounts"],
+    "request_matcher": { "protocol": "HTTP", "method": "GET", "path": "/api/v1/accounts" },
+    "response_template": {
+      "status_code": 200,
+      "body": { "items": "{{state.values}}", "count": "{{state.count}}" }
+    },
+    "state_action": { "op": "LIST", "collection": "accounts" }
+  },
+  {
+    "stub_id": "stub_account_update_v1",
+    "description": "Partial update (JSON merge patch) of an existing account.",
+    "tags": ["core-banking", "accounts"],
+    "request_matcher": { "protocol": "HTTP", "method": "PUT", "path": "/api/v1/accounts/{id}" },
+    "response_template": { "status_code": 200 },
+    "state_action": { "op": "MERGE", "collection": "accounts", "key": "{{request.path.id}}", "value": "{{request.body}}" },
+    "not_found_response": {
+      "status_code": 404,
+      "body": { "error": "ACCOUNT_NOT_FOUND", "account_id": "{{request.path.id}}" }
+    }
+  },
+  {
+    "stub_id": "stub_account_delete_v1",
+    "description": "Close (delete) an account.",
+    "tags": ["core-banking", "accounts"],
+    "request_matcher": { "protocol": "HTTP", "method": "DELETE", "path": "/api/v1/accounts/{id}" },
+    "response_template": { "status_code": 204 },
+    "state_action": { "op": "DELETE", "collection": "accounts", "key": "{{request.path.id}}" },
+    "not_found_response": {
+      "status_code": 404,
+      "body": { "error": "ACCOUNT_NOT_FOUND", "account_id": "{{request.path.id}}" }
+    }
+  },
+  {
+    "stub_id": "stub_customer_account_v1",
+    "description": "Nested path with two variables echoed back.",
+    "tags": ["core-banking", "customers"],
+    "request_matcher": { "protocol": "HTTP", "method": "GET", "path": "/api/v1/customers/{customerId}/accounts/{accountId}" },
+    "response_template": {
+      "status_code": 200,
+      "body": {
+        "customer_id": "{{request.path.customerId}}",
+        "account_id": "{{request.path.accountId}}",
+        "relationship": "PRIMARY_OWNER",
+        "link": "/api/v1/customers/{{request.path.customerId}}/accounts/{{request.path.accountId}}"
+      }
+    }
+  },
+  {
+    "stub_id": "stub_health_v1",
+    "tags": ["platform"],
+    "request_matcher": { "protocol": "HTTP", "method": "GET", "path": "/api/v1/health" },
+    "response_template": { "status_code": 200, "body": { "status": "UP", "backend": "VIRTUAL" } }
+  },
+  {
+    "stub_id": "stub_legacy_gone_v1",
+    "description": "Any method, any depth under the retired mainframe gateway.",
+    "tags": ["mainframe"],
+    "request_matcher": { "protocol": "HTTP", "method": "*", "path": "/api/v1/legacy/**" },
+    "response_template": {
+      "status_code": 410,
+      "body": { "error": "MAINFRAME_ENDPOINT_RETIRED", "retired_path": "{{request.path.tail}}" }
+    }
+  },
+  {
+    "stub_id": "stub_fx_rate_v1",
+    "description": "Single-segment wildcard.",
+    "tags": ["markets"],
+    "request_matcher": { "protocol": "HTTP", "method": "GET", "path": "/api/v1/fx/*/rate" },
+    "response_template": { "status_code": 200, "body": { "rate": 83.12, "source": "VIRTUAL" } }
+  },
+  {
+    "stub_id": "stub_payment_sanctioned_v1",
+    "description": "Deep scan: a sanctioned country anywhere in the payload is blocked.",
+    "priority": 20,
+    "tags": ["payments", "negative"],
+    "request_matcher": {
+      "protocol": "HTTP", "method": "POST", "path": "/api/v1/payments",
+      "body_jsonpath": { "$..country": "KP" }
+    },
+    "response_template": { "status_code": 403, "body": { "status": "BLOCKED", "reason": "SANCTIONS_SCREENING" } }
+  },
+  {
+    "stub_id": "stub_payment_high_risk_v1",
+    "description": "Regex on merchant id routes high-risk merchants to manual review.",
+    "priority": 10,
+    "tags": ["payments"],
+    "request_matcher": {
+      "protocol": "HTTP", "method": "POST", "path": "/api/v1/payments",
+      "body_jsonpath": { "$.merchant_id": { "matches": "^MERCH_9\\d{3}$" } }
+    },
+    "response_template": {
+      "status_code": 202,
+      "body": { "status": "PENDING_REVIEW", "reason": "HIGH_RISK_MERCHANT", "merchant_id": "{{request.body.merchant_id}}" }
+    }
+  },
+  {
+    "stub_id": "stub_payment_large_amount_v1",
+    "description": "Numeric comparison: payments above 10,000 need review.",
+    "priority": 5,
+    "tags": ["payments"],
+    "request_matcher": {
+      "protocol": "HTTP", "method": "POST", "path": "/api/v1/payments",
+      "body_jsonpath": { "$.amount": { "gt": 10000 } }
+    },
+    "response_template": {
+      "status_code": 202,
+      "body": { "status": "PENDING_REVIEW", "reason": "LARGE_AMOUNT", "amount": "{{request.body.amount}}" }
+    }
+  },
+  {
+    "stub_id": "stub_payment_visa_v1",
+    "description": "Multi-field JSONPath + header constraint. Stores the payment in session state.",
+    "tags": ["payments"],
+    "request_matcher": {
+      "protocol": "HTTP", "method": "POST", "path": "/api/v1/payments",
+      "headers": { "Content-Type": "application/json" },
+      "body_jsonpath": { "$.merchant_id": "MERCH_1092", "$.card.network": "VISA" }
+    },
+    "response_template": {
+      "status_code": 200,
+      "body": {
+        "transaction_id": "{{generate.id:TXN}}",
+        "merchant_id": "{{request.body.merchant_id}}",
+        "amount": "{{request.body.amount}}",
+        "card_type": "VISA",
+        "status": "APPROVED"
+      }
+    },
+    "state_action": { "op": "PUT", "collection": "payments", "key": "{{response.body.transaction_id}}" }
+  },
+  {
+    "stub_id": "stub_payment_missing_merchant_v1",
+    "description": "exists:false - payload without merchant_id is rejected.",
+    "tags": ["payments", "negative"],
+    "request_matcher": {
+      "protocol": "HTTP", "method": "POST", "path": "/api/v1/payments",
+      "body_jsonpath": { "$.merchant_id": { "exists": false } }
+    },
+    "response_template": { "status_code": 400, "body": { "error": "MERCHANT_ID_REQUIRED" } }
+  },
+  {
+    "stub_id": "stub_payment_generic_v1",
+    "description": "Catch-all approval for any other payment.",
+    "priority": -10,
+    "tags": ["payments"],
+    "request_matcher": { "protocol": "HTTP", "method": "POST", "path": "/api/v1/payments" },
+    "response_template": {
+      "status_code": 200,
+      "body": { "transaction_id": "{{generate.id:TXN}}", "status": "APPROVED", "amount": "{{request.body.amount}}" }
+    },
+    "state_action": { "op": "PUT", "collection": "payments", "key": "{{response.body.transaction_id}}" }
+  },
+  {
+    "stub_id": "stub_payment_get_v1",
+    "tags": ["payments"],
+    "request_matcher": { "protocol": "HTTP", "method": "GET", "path": "/api/v1/payments/{transactionId}" },
+    "response_template": { "status_code": 200 },
+    "state_action": { "op": "GET", "collection": "payments", "key": "{{request.path.transactionId}}" }
+  },
+  {
+    "stub_id": "stub_order_restricted_v1",
+    "description": "Wildcard array JSONPath: any restricted item blocks the order.",
+    "priority": 10,
+    "tags": ["orders", "negative"],
+    "request_matcher": {
+      "protocol": "HTTP", "method": "POST", "path": "/api/v1/orders",
+      "body_jsonpath": { "$.items[*].category": "RESTRICTED" }
+    },
+    "response_template": { "status_code": 422, "body": { "error": "RESTRICTED_ITEM" } }
+  },
+  {
+    "stub_id": "stub_order_premium_v1",
+    "description": "Array index JSONPath.",
+    "priority": 5,
+    "tags": ["orders"],
+    "request_matcher": {
+      "protocol": "HTTP", "method": "POST", "path": "/api/v1/orders",
+      "body_jsonpath": { "$.items[0].sku": "SKU-PREMIUM" }
+    },
+    "response_template": { "status_code": 201, "body": { "order_id": "{{generate.id:ORD}}", "fulfilment": "EXPRESS" } }
+  },
+  {
+    "stub_id": "stub_order_standard_v1",
+    "tags": ["orders"],
+    "request_matcher": { "protocol": "HTTP", "method": "POST", "path": "/api/v1/orders" },
+    "response_template": { "status_code": 201, "body": { "order_id": "{{generate.id:ORD}}", "fulfilment": "STANDARD" } }
+  },
+  {
+    "stub_id": "stub_profile_authorized_v1",
+    "description": "Header regex: requires a bearer token.",
+    "tags": ["identity"],
+    "request_matcher": {
+      "protocol": "HTTP", "method": "GET", "path": "/api/v1/secure/profile",
+      "headers": { "Authorization": { "matches": "^Bearer \\S+$" } }
+    },
+    "response_template": { "status_code": 200, "body": { "user_id": "USR-1", "roles": ["TELLER"] } }
+  },
+  {
+    "stub_id": "stub_profile_unauthorized_v1",
+    "priority": -1,
+    "tags": ["identity", "negative"],
+    "request_matcher": { "protocol": "HTTP", "method": "GET", "path": "/api/v1/secure/profile" },
+    "response_template": {
+      "status_code": 401,
+      "headers": { "WWW-Authenticate": "Bearer" },
+      "body": { "error": "UNAUTHORIZED" }
+    }
+  },
+  {
+    "stub_id": "stub_txn_pending_v1",
+    "description": "Query parameter constraint.",
+    "tags": ["payments"],
+    "request_matcher": {
+      "protocol": "HTTP", "method": "GET", "path": "/api/v1/transactions",
+      "query": { "status": "PENDING" }
+    },
+    "response_template": {
+      "status_code": 200,
+      "body": { "status_filter": "{{request.query.status}}", "items": [ { "id": "TXN-1", "status": "PENDING" } ] }
+    }
+  },
+  {
+    "stub_id": "stub_txn_list_v1",
+    "priority": -1,
+    "tags": ["payments"],
+    "request_matcher": { "protocol": "HTTP", "method": "GET", "path": "/api/v1/transactions" },
+    "response_template": { "status_code": 200, "body": { "status_filter": "{{request.query.status ?: 'ALL'}}", "items": [] } }
+  },
+  {
+    "stub_id": "stub_offers_mobile_v1",
+    "description": "Header equality (header names are case-insensitive).",
+    "tags": ["marketing"],
+    "request_matcher": {
+      "protocol": "HTTP", "method": "GET", "path": "/api/v1/offers",
+      "headers": { "X-Channel": "MOBILE" }
+    },
+    "response_template": { "status_code": 200, "body": { "channel": "MOBILE", "offers": ["APP_CASHBACK_5"] } }
+  },
+  {
+    "stub_id": "stub_offers_default_v1",
+    "priority": -1,
+    "tags": ["marketing"],
+    "request_matcher": { "protocol": "HTTP", "method": "GET", "path": "/api/v1/offers" },
+    "response_template": { "status_code": 200, "body": { "channel": "WEB", "offers": [] } }
+  }
+]

@@ -1,0 +1,277 @@
+{
+  "suite": "stub_match_scenarios",
+  "description": "30 labelled execution scenarios against the seed stubs (stub-engine/src/main/resources/seed/seed-stubs.json). Every scenario uses its own session ids, so scenarios are independent and can run in any order. 'setup' requests run first and are not asserted. 'expect.body' is a subset match; numbers compare numerically.",
+  "scenarios": [
+    {
+      "id": "S01", "category": "path_matching",
+      "name": "Static path + JSONPath body match creates an account (worked example)",
+      "request": {
+        "session_id": "s01", "protocol": "HTTP", "method": "POST", "path": "/api/v1/accounts",
+        "headers": { "Content-Type": "application/json", "X-Correlation-ID": "trace-abc-123" },
+        "body": { "account_holder": "Jane Doe", "initial_deposit": 500.00, "currency": "USD" }
+      },
+      "expect": {
+        "matched_stub_id": "stub_account_create_v1", "status_code": 201, "state_mutated": true,
+        "matched_rules": ["path_exact", "jsonpath_body_check"],
+        "body": { "account_id": "ACC-1001", "account_holder": "Jane Doe", "balance": 500.0, "status": "ACTIVE" }
+      }
+    },
+    {
+      "id": "S02", "category": "state_mutation",
+      "name": "Client-supplied id is honoured instead of a generated one",
+      "request": {
+        "session_id": "s02", "method": "POST", "path": "/api/v1/accounts",
+        "body": { "account_id": "ACC-777", "account_holder": "Raj Kumar", "initial_deposit": 10, "currency": "USD" }
+      },
+      "expect": { "matched_stub_id": "stub_account_create_v1", "status_code": 201, "state_mutated": true,
+                  "body": { "account_id": "ACC-777", "balance": 10 } }
+    },
+    {
+      "id": "S03", "category": "state_mutation",
+      "name": "Read-after-write through a path variable in the same session",
+      "setup": [
+        { "session_id": "s03", "method": "POST", "path": "/api/v1/accounts",
+          "body": { "account_id": "ACC-9921", "account_holder": "Jane Doe", "initial_deposit": 500.0, "currency": "USD" } }
+      ],
+      "request": { "session_id": "s03", "method": "GET", "path": "/api/v1/accounts/ACC-9921" },
+      "expect": { "matched_stub_id": "stub_account_get_v1", "status_code": 200, "state_mutated": false,
+                  "matched_rules": ["path_pattern"],
+                  "body": { "account_id": "ACC-9921", "account_holder": "Jane Doe", "balance": 500.0, "status": "ACTIVE" } }
+    },
+    {
+      "id": "S04", "category": "path_matching",
+      "name": "Nested path with two variables, both echoed into the response",
+      "request": { "session_id": "s04", "method": "GET", "path": "/api/v1/customers/C-42/accounts/ACC-9" },
+      "expect": { "matched_stub_id": "stub_customer_account_v1", "status_code": 200,
+                  "body": { "customer_id": "C-42", "account_id": "ACC-9", "link": "/api/v1/customers/C-42/accounts/ACC-9" } }
+    },
+    {
+      "id": "S05", "category": "path_matching",
+      "name": "Literal segment beats a path variable at the same depth",
+      "setup": [
+        { "session_id": "s05", "method": "POST", "path": "/api/v1/accounts",
+          "body": { "account_holder": "Mei Lin", "initial_deposit": 1, "currency": "USD" } }
+      ],
+      "request": { "session_id": "s05", "method": "GET", "path": "/api/v1/accounts/summary" },
+      "expect": { "matched_stub_id": "stub_account_summary_v1", "status_code": 200, "body": { "total_accounts": 1 } }
+    },
+    {
+      "id": "S06", "category": "fallback",
+      "name": "Known path but unsupported method returns NO_MATCHING_STUB",
+      "request": { "session_id": "s06", "method": "PATCH", "path": "/api/v1/health" },
+      "expect": { "matched_stub_id": null, "status_code": 404, "body": { "error": "NO_MATCHING_STUB" } }
+    },
+    {
+      "id": "S07", "category": "path_matching",
+      "name": "Tail wildcard (**) matches any method and depth, exposes the tail",
+      "request": { "session_id": "s07", "method": "DELETE", "path": "/api/v1/legacy/cics/txn/AB12" },
+      "expect": { "matched_stub_id": "stub_legacy_gone_v1", "status_code": 410, "body": { "retired_path": "cics/txn/AB12" } }
+    },
+    {
+      "id": "S08", "category": "path_matching",
+      "name": "Single-segment wildcard, trailing slash tolerated",
+      "request": { "session_id": "s08", "method": "GET", "path": "/api/v1/fx/USD-INR/rate/" },
+      "expect": { "matched_stub_id": "stub_fx_rate_v1", "status_code": 200, "body": { "rate": 83.12 } }
+    },
+    {
+      "id": "S09", "category": "jsonpath",
+      "name": "Multi-field JSONPath (nested) + header constraint; payment stored in session",
+      "request": {
+        "session_id": "s09", "method": "POST", "path": "/api/v1/payments",
+        "headers": { "Content-Type": "application/json" },
+        "body": { "merchant_id": "MERCH_1092", "amount": 150.0, "card": { "network": "VISA", "last_four": "1111" } }
+      },
+      "expect": { "matched_stub_id": "stub_payment_visa_v1", "status_code": 200, "state_mutated": true,
+                  "matched_rules": ["path_exact", "header_constraints", "jsonpath_body_check"],
+                  "body": { "transaction_id": "TXN-1001", "status": "APPROVED", "amount": 150.0 } }
+    },
+    {
+      "id": "S10", "category": "header_matching",
+      "name": "Content-Type with charset parameter still satisfies the media-type constraint",
+      "request": {
+        "session_id": "s10", "method": "POST", "path": "/api/v1/payments",
+        "headers": { "content-type": "application/json; charset=UTF-8" },
+        "body": { "merchant_id": "MERCH_1092", "amount": 99.5, "card": { "network": "VISA" } }
+      },
+      "expect": { "matched_stub_id": "stub_payment_visa_v1", "status_code": 200 }
+    },
+    {
+      "id": "S11", "category": "fallback",
+      "name": "Header constraint fails, request falls through to the lower-priority catch-all",
+      "request": {
+        "session_id": "s11", "method": "POST", "path": "/api/v1/payments",
+        "headers": { "Content-Type": "text/plain" },
+        "body": { "merchant_id": "MERCH_1092", "amount": 20, "card": { "network": "VISA" } }
+      },
+      "expect": { "matched_stub_id": "stub_payment_generic_v1", "status_code": 200, "body": { "status": "APPROVED" } }
+    },
+    {
+      "id": "S12", "category": "jsonpath",
+      "name": "Regex operator on a body field",
+      "request": {
+        "session_id": "s12", "method": "POST", "path": "/api/v1/payments",
+        "headers": { "Content-Type": "application/json" },
+        "body": { "merchant_id": "MERCH_9001", "amount": 75, "card": { "network": "VISA" } }
+      },
+      "expect": { "matched_stub_id": "stub_payment_high_risk_v1", "status_code": 202,
+                  "body": { "reason": "HIGH_RISK_MERCHANT", "merchant_id": "MERCH_9001" } }
+    },
+    {
+      "id": "S13", "category": "jsonpath",
+      "name": "Numeric comparison (gt) outranks an otherwise matching lower-priority stub",
+      "request": {
+        "session_id": "s13", "method": "POST", "path": "/api/v1/payments",
+        "headers": { "Content-Type": "application/json" },
+        "body": { "merchant_id": "MERCH_1092", "amount": 25000, "card": { "network": "VISA" } }
+      },
+      "expect": { "matched_stub_id": "stub_payment_large_amount_v1", "status_code": 202, "body": { "reason": "LARGE_AMOUNT", "amount": 25000 } }
+    },
+    {
+      "id": "S14", "category": "jsonpath",
+      "name": "Deep scan ($..country) finds a sanctioned country at any depth",
+      "request": {
+        "session_id": "s14", "method": "POST", "path": "/api/v1/payments",
+        "body": { "merchant_id": "MERCH_1092", "amount": 10, "beneficiary": { "name": "X", "address": { "country": "KP" } } }
+      },
+      "expect": { "matched_stub_id": "stub_payment_sanctioned_v1", "status_code": 403, "body": { "status": "BLOCKED" } }
+    },
+    {
+      "id": "S15", "category": "jsonpath",
+      "name": "exists:false matches a payload missing a required field",
+      "request": { "session_id": "s15", "method": "POST", "path": "/api/v1/payments", "body": { "amount": 10 } },
+      "expect": { "matched_stub_id": "stub_payment_missing_merchant_v1", "status_code": 400, "body": { "error": "MERCHANT_ID_REQUIRED" } }
+    },
+    {
+      "id": "S16", "category": "jsonpath",
+      "name": "Array index JSONPath ($.items[0].sku)",
+      "request": {
+        "session_id": "s16", "method": "POST", "path": "/api/v1/orders",
+        "body": { "items": [ { "sku": "SKU-PREMIUM", "category": "ELECTRONICS" }, { "sku": "SKU-CABLE", "category": "ELECTRONICS" } ] }
+      },
+      "expect": { "matched_stub_id": "stub_order_premium_v1", "status_code": 201, "body": { "fulfilment": "EXPRESS", "order_id": "ORD-1001" } }
+    },
+    {
+      "id": "S17", "category": "jsonpath",
+      "name": "Wildcard array JSONPath ($.items[*].category) matches if any element matches",
+      "request": {
+        "session_id": "s17", "method": "POST", "path": "/api/v1/orders",
+        "body": { "items": [ { "sku": "SKU-PREMIUM", "category": "BOOKS" }, { "sku": "SKU-X", "category": "RESTRICTED" } ] }
+      },
+      "expect": { "matched_stub_id": "stub_order_restricted_v1", "status_code": 422, "body": { "error": "RESTRICTED_ITEM" } }
+    },
+    {
+      "id": "S18", "category": "fallback",
+      "name": "Unknown route returns NO_MATCHING_STUB, never a 500",
+      "request": { "session_id": "s18", "method": "GET", "path": "/api/v2/unknown/resource" },
+      "expect": { "matched_stub_id": null, "status_code": 404, "body": { "error": "NO_MATCHING_STUB" } }
+    },
+    {
+      "id": "S19", "category": "header_matching",
+      "name": "Header regex: bearer token present",
+      "request": {
+        "session_id": "s19", "method": "GET", "path": "/api/v1/secure/profile",
+        "headers": { "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.e30.sig" }
+      },
+      "expect": { "matched_stub_id": "stub_profile_authorized_v1", "status_code": 200, "matched_rules": ["path_exact", "header_constraints"] }
+    },
+    {
+      "id": "S20", "category": "fallback",
+      "name": "Header absent: falls back to the 401 stub",
+      "request": { "session_id": "s20", "method": "GET", "path": "/api/v1/secure/profile" },
+      "expect": { "matched_stub_id": "stub_profile_unauthorized_v1", "status_code": 401, "body": { "error": "UNAUTHORIZED" } }
+    },
+    {
+      "id": "S21", "category": "query_matching",
+      "name": "Query parameter constraint taken from the path's query string",
+      "request": { "session_id": "s21", "method": "GET", "path": "/api/v1/transactions?status=PENDING&page=1" },
+      "expect": { "matched_stub_id": "stub_txn_pending_v1", "status_code": 200, "matched_rules": ["path_exact", "query_constraints"],
+                  "body": { "status_filter": "PENDING" } }
+    },
+    {
+      "id": "S22", "category": "fallback",
+      "name": "Different query value falls back, fallback template uses ?: default",
+      "request": { "session_id": "s22", "method": "GET", "path": "/api/v1/transactions", "query": { "status": "SETTLED" } },
+      "expect": { "matched_stub_id": "stub_txn_list_v1", "status_code": 200, "body": { "status_filter": "SETTLED" } }
+    },
+    {
+      "id": "S23", "category": "header_matching",
+      "name": "Header names are case-insensitive",
+      "request": { "session_id": "s23", "method": "GET", "path": "/api/v1/offers", "headers": { "x-channel": "MOBILE" } },
+      "expect": { "matched_stub_id": "stub_offers_mobile_v1", "status_code": 200, "body": { "channel": "MOBILE" } }
+    },
+    {
+      "id": "S24", "category": "fallback",
+      "name": "JSONPath constraint fails (EUR), rejected by fallback stub without mutating state",
+      "request": {
+        "session_id": "s24", "method": "POST", "path": "/api/v1/accounts",
+        "body": { "account_holder": "Hans Muller", "initial_deposit": 50, "currency": "EUR" }
+      },
+      "expect": { "matched_stub_id": "stub_account_create_rejected_v1", "status_code": 422, "state_mutated": false,
+                  "body": { "error": "UNSUPPORTED_CURRENCY", "currency": "EUR" } }
+    },
+    {
+      "id": "S25", "category": "state_mutation",
+      "name": "PUT merges a partial update into existing state",
+      "setup": [
+        { "session_id": "s25", "method": "POST", "path": "/api/v1/accounts",
+          "body": { "account_id": "ACC-200", "account_holder": "Asha Rao", "initial_deposit": 100, "currency": "USD" } }
+      ],
+      "request": { "session_id": "s25", "method": "PUT", "path": "/api/v1/accounts/ACC-200", "body": { "status": "FROZEN" } },
+      "expect": { "matched_stub_id": "stub_account_update_v1", "status_code": 200, "state_mutated": true,
+                  "body": { "account_id": "ACC-200", "account_holder": "Asha Rao", "balance": 100, "status": "FROZEN" } }
+    },
+    {
+      "id": "S26", "category": "state_mutation",
+      "name": "DELETE removes state; a later GET in the same session is 404",
+      "setup": [
+        { "session_id": "s26", "method": "POST", "path": "/api/v1/accounts",
+          "body": { "account_id": "ACC-300", "account_holder": "Tom", "currency": "USD" } },
+        { "session_id": "s26", "method": "DELETE", "path": "/api/v1/accounts/ACC-300" }
+      ],
+      "request": { "session_id": "s26", "method": "GET", "path": "/api/v1/accounts/ACC-300" },
+      "expect": { "matched_stub_id": "stub_account_get_v1", "status_code": 404, "state_mutated": false,
+                  "body": { "error": "ACCOUNT_NOT_FOUND", "account_id": "ACC-300" } }
+    },
+    {
+      "id": "S27", "category": "state_mutation",
+      "name": "LIST returns every entity created in the session",
+      "setup": [
+        { "session_id": "s27", "method": "POST", "path": "/api/v1/accounts", "body": { "account_id": "ACC-1", "account_holder": "A", "currency": "USD" } },
+        { "session_id": "s27", "method": "POST", "path": "/api/v1/accounts", "body": { "account_id": "ACC-2", "account_holder": "B", "currency": "USD" } }
+      ],
+      "request": { "session_id": "s27", "method": "GET", "path": "/api/v1/accounts" },
+      "expect": { "matched_stub_id": "stub_account_list_v1", "status_code": 200, "body": { "count": 2 } }
+    },
+    {
+      "id": "S28", "category": "session_isolation",
+      "name": "Session B cannot read an entity created in session A",
+      "setup": [
+        { "session_id": "s28-A", "method": "POST", "path": "/api/v1/accounts",
+          "body": { "account_id": "ACC-100", "account_holder": "Alice", "currency": "USD" } }
+      ],
+      "request": { "session_id": "s28-B", "method": "GET", "path": "/api/v1/accounts/ACC-100" },
+      "expect": { "matched_stub_id": "stub_account_get_v1", "status_code": 404, "body": { "error": "ACCOUNT_NOT_FOUND" } }
+    },
+    {
+      "id": "S29", "category": "session_isolation",
+      "name": "Same entity id written by two sessions: each reads only its own value",
+      "setup": [
+        { "session_id": "s29-A", "method": "POST", "path": "/api/v1/accounts",
+          "body": { "account_id": "ACC-500", "account_holder": "Alice", "currency": "USD" } },
+        { "session_id": "s29-B", "method": "POST", "path": "/api/v1/accounts",
+          "body": { "account_id": "ACC-500", "account_holder": "Bob", "currency": "USD" } }
+      ],
+      "request": { "session_id": "s29-A", "method": "GET", "path": "/api/v1/accounts/ACC-500" },
+      "expect": { "matched_stub_id": "stub_account_get_v1", "status_code": 200, "body": { "account_holder": "Alice" } }
+    },
+    {
+      "id": "S30", "category": "session_isolation",
+      "name": "Generated ids are per session: a second pipeline also starts at ACC-1001",
+      "setup": [
+        { "session_id": "s30-A", "method": "POST", "path": "/api/v1/accounts", "body": { "account_holder": "First", "currency": "USD" } }
+      ],
+      "request": { "session_id": "s30-B", "method": "POST", "path": "/api/v1/accounts", "body": { "account_holder": "Second", "currency": "USD" } },
+      "expect": { "matched_stub_id": "stub_account_create_v1", "status_code": 201, "body": { "account_id": "ACC-1001" } }
+    }
+  ]
+}
