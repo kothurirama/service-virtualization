@@ -456,17 +456,31 @@ public final class SensitiveDataSanitizer {
 
     /** Embedded secrets / identifiers inside free text (notes, URLs, error messages). */
     private Object scanText(String s, String field, Ctx ctx) {
+        // cheap prefilters decide which (comparatively expensive) patterns can possibly match
+        int digits = ValueDetectors.countDigits(s);
+        boolean at = s.indexOf('@') > 0;
+        boolean jwt = s.contains("eyJ");
+        boolean pem = s.contains("PRIVATE KEY");
+        boolean auth = s.length() >= 18 && (s.contains("earer ") || s.contains("asic ") || s.contains("EARER ") || s.contains("ASIC "));
+        boolean prefix = s.contains("_live_") || s.contains("_test_") || s.contains("AKIA") || s.contains("ASIA")
+                || s.contains("gh") || s.contains("xox") || s.contains("AIza") || s.contains("glpat-");
+        if (!(at || jwt || pem || auth || prefix || digits >= 9)) {
+            return s;
+        }
         String text = s;
         SensitiveType first = null;
         Object[][] passes = {
-                {TEXT_PRIVATE_KEY, SensitiveType.PRIVATE_KEY},
-                {TEXT_JWT, SensitiveType.JWT},
-                {TEXT_AUTH, SensitiveType.AUTH_HEADER},
-                {TEXT_SECRET, SensitiveType.API_KEY},
-                {TEXT_EMAIL, SensitiveType.EMAIL},
-                {TEXT_PAN, SensitiveType.PAN},
-                {TEXT_SSN, SensitiveType.SSN}};
+                {TEXT_PRIVATE_KEY, SensitiveType.PRIVATE_KEY, pem},
+                {TEXT_JWT, SensitiveType.JWT, jwt},
+                {TEXT_AUTH, SensitiveType.AUTH_HEADER, auth},
+                {TEXT_SECRET, SensitiveType.API_KEY, prefix},
+                {TEXT_EMAIL, SensitiveType.EMAIL, at},
+                {TEXT_PAN, SensitiveType.PAN, digits >= 13},
+                {TEXT_SSN, SensitiveType.SSN, digits >= 9 && s.indexOf('-') >= 0}};
         for (Object[] pass : passes) {
+            if (!(Boolean) pass[2]) {
+                continue;
+            }
             Pattern p = (Pattern) pass[0];
             SensitiveType type = (SensitiveType) pass[1];
             Matcher m = p.matcher(text);

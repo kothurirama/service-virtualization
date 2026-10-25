@@ -118,7 +118,30 @@ public final class KeyClassifier {
         }
     }
 
+    private static final int CACHE_LIMIT = 20_000;
+    private static final java.util.concurrent.ConcurrentHashMap<String, KeyHint> CACHE = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * Field names repeat constantly in real traffic, so classification is memoised (bounded: once
+     * full, new names are classified without caching).
+     */
     public static KeyHint classify(String key, String parentKey) {
+        if (key == null) {
+            return KeyHint.NONE;
+        }
+        String cacheKey = parentKey == null ? key : key + '\u0000' + parentKey;
+        KeyHint cached = CACHE.get(cacheKey);
+        if (cached != null) {
+            return cached;
+        }
+        KeyHint hint = classifyUncached(key, parentKey);
+        if (CACHE.size() < CACHE_LIMIT) {
+            CACHE.put(cacheKey, hint);
+        }
+        return hint;
+    }
+
+    static KeyHint classifyUncached(String key, String parentKey) {
         List<String> t = tokens(key);
         if (t.isEmpty()) {
             return KeyHint.NONE;

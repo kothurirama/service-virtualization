@@ -18,9 +18,18 @@ class SanitizerThroughputTest {
 
     @Test
     void sanitisesThousandsOfLogsPerSecondOnOneCore() {
+        // ~2 KB exchanges: each golden request paired with a response listing 12 golden response bodies
+        List<GoldenDataset.Record> golden = GoldenDataset.load();
         List<RawTrafficLog> corpus = new ArrayList<>();
-        for (GoldenDataset.Record r : GoldenDataset.load()) {
-            corpus.add(r.log());
+        for (int i = 0; i < golden.size(); i++) {
+            RawTrafficLog base = golden.get(i).log();
+            List<Object> items = new ArrayList<>();
+            for (int k = 0; k < 12; k++) {
+                RawTrafficLog other = golden.get((i + k) % golden.size()).log();
+                items.add(other.response() == null ? Map.of() : other.response().body());
+            }
+            corpus.add(new RawTrafficLog(base.protocol(), base.method(), base.path(), base.request(),
+                    new RawMessage(200, Map.of("Content-Type", "application/json"), Map.of("items", items)), null));
         }
         double avgBytes = corpus.stream().mapToInt(l -> Json.write(l).length()).average().orElse(0);
         SanitizerStubGenerator pipeline = new SanitizerStubGenerator();

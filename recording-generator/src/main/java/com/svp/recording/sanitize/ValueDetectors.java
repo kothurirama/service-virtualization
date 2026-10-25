@@ -139,7 +139,7 @@ public final class ValueDetectors {
     }
 
     public static boolean isFormattedSsn(String s) {
-        return FORMATTED_SSN.matcher(s).matches();
+        return s.length() == 11 && FORMATTED_SSN.matcher(s).matches();
     }
 
     public static boolean isEmail(String s) {
@@ -152,12 +152,22 @@ public final class ValueDetectors {
 
     /** @return the auth scheme ("Bearer") when the value is "Scheme credential", else null */
     public static String authScheme(String s) {
+        if (s.length() < 8 || s.indexOf(' ') < 0 || !Character.isLetter(s.charAt(0))) {
+            return null; // cheap prefilter: the regex below only runs on "Word something" values
+        }
         var m = AUTH_SCHEME.matcher(s.trim());
         return m.matches() ? m.group(1) : null;
     }
 
     public static boolean isKnownSecret(String s) {
-        return s.length() >= 16 && KNOWN_SECRET.matcher(s).matches();
+        if (s.length() < 16) {
+            return false;
+        }
+        char c = s.charAt(0);
+        if (c != 's' && c != 'r' && c != 'p' && c != 'A' && c != 'g' && c != 'x' && c != 'S') {
+            return false;
+        }
+        return KNOWN_SECRET.matcher(s).matches();
     }
 
     public static boolean isPrivateKey(String s) {
@@ -166,6 +176,10 @@ public final class ValueDetectors {
 
     /** ISO 13616 IBAN with a valid mod-97 checksum. */
     public static boolean isIban(String s) {
+        if (s.length() < 15 || s.length() > 42 || !Character.isUpperCase(s.charAt(0))
+                || !Character.isUpperCase(s.charAt(1)) || !Character.isDigit(s.charAt(2))) {
+            return false;
+        }
         String compact = s.replace(" ", "");
         if (!IBAN.matcher(compact).matches()) {
             return false;
@@ -179,7 +193,7 @@ public final class ValueDetectors {
     }
 
     public static boolean isE164(String s) {
-        return E164.matcher(s).matches();
+        return s.length() >= 9 && s.charAt(0) == '+' && E164.matcher(s).matches();
     }
 
     public static boolean isPhoneLike(String s) {
@@ -201,8 +215,23 @@ public final class ValueDetectors {
 
     /** "****1111", "XXX-XX-1234", "411111******1111", "[REDACTED]" — already safe. */
     public static boolean isAlreadyMasked(String s) {
-        String u = s.toUpperCase();
-        return u.contains("REDACTED") || u.contains("MASKED") || ALREADY_MASKED.matcher(s).matches();
+        boolean maskChar = false;
+        boolean bracket = false;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '*' || c == 'X' || c == 'x' || c == '\u2022' || c == '#') {
+                maskChar = true;
+            } else if (c == '[' || c == 'M' || c == 'm' || c == 'R' || c == 'r') {
+                bracket = true;
+            }
+        }
+        if (bracket) {
+            String u = s.toUpperCase();
+            if (u.contains("REDACTED") || u.contains("MASKED")) {
+                return true;
+            }
+        }
+        return maskChar && ALREADY_MASKED.matcher(s).matches();
     }
 
     public static boolean isDateLike(String s) {
