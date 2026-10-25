@@ -1,0 +1,99 @@
+<section class="page">
+  <div class="page-head">
+    <div>
+      <h1>Traffic</h1>
+      <p>Every request the virtual services answered, newest first, with the stub that matched and the time spent inside the engine.</p>
+    </div>
+    <div class="toolbar">
+      <button type="button" (click)="composerOpen.set(!composerOpen())" [attr.aria-expanded]="composerOpen()">
+        {{ composerOpen() ? 'Hide request composer' : 'Send a request' }}
+      </button>
+      <button type="button" (click)="toggleLive()" [class.primary]="!live()">{{ live() ? 'Pause' : 'Resume live' }}</button>
+      <button type="button" class="quiet" (click)="clear()">Clear log</button>
+    </div>
+  </div>
+
+  @if (composerOpen()) {
+    <div class="panel composer">
+      <div class="c-line">
+        <select [(ngModel)]="cMethod" aria-label="Method">
+          @for (m of ['GET','POST','PUT','PATCH','DELETE']; track m) { <option>{{ m }}</option> }
+        </select>
+        <input type="text" class="mono path" [(ngModel)]="cPath" aria-label="Path" />
+        <input type="text" class="mono" [(ngModel)]="cSession" aria-label="Session id" placeholder="session id" />
+        <button type="button" class="primary" (click)="send()" [disabled]="sending()">Send</button>
+      </div>
+      <div class="c-grid">
+        <label class="field">Headers<textarea rows="4" [(ngModel)]="cHeaders"></textarea></label>
+        <label class="field">Body<textarea rows="4" [(ngModel)]="cBody"></textarea></label>
+      </div>
+      @if (cError()) { <p class="notice bad">{{ cError() }}</p> }
+      @if (cResult(); as r) {
+        <div class="c-result">
+          <p>
+            <span class="status" [class]="statusClass(r.status_code)">{{ r.status_code }}</span>
+            @if (r.matched_stub_id) { from <code>{{ r.matched_stub_id }}</code> } @else { <strong class="miss">no stub matched</strong> }
+            in {{ lat(r.execution_latency_ms) }}
+            @if (r.matched_rules.length) { <span class="muted">({{ r.matched_rules.join(', ') }})</span> }
+            @if (r.state_mutated) { <span class="tag">wrote state</span> }
+          </p>
+          <pre class="json">{{ pretty(r.body) }}</pre>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="toolbar">
+    <label class="field inline">Session
+      <select [ngModel]="sessionFilter()" (ngModelChange)="sessionFilter.set($event)">
+        <option value="">All sessions</option>
+        @for (s of sessionsSeen(); track s) { <option [value]="s">{{ s }}</option> }
+      </select>
+    </label>
+    <label class="field inline">Stub or path
+      <input type="search" [ngModel]="stubFilter()" (ngModelChange)="stubFilter.set($event)" placeholder="e.g. payment" />
+    </label>
+    <span class="faint count">{{ visible().length }} of {{ rows().length }} shown</span>
+  </div>
+
+  @if (error()) { <p class="notice bad">{{ error() }}</p> }
+
+  <div class="panel ledger-wrap">
+    @if (visible().length === 0) {
+      <div class="empty">
+        <p>No traffic yet. Call <code>/virtual/api/v1/health</code>, run a pipeline against <code>/virtual</code>, or use “Send a request” above.</p>
+      </div>
+    } @else {
+      <table class="ledger">
+        <thead>
+          <tr><th>Time</th><th>Session</th><th>Request</th><th>Matched stub</th><th class="num">Status</th><th class="num">Engine</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          @for (r of visible(); track r.seq) {
+            <tr (click)="select(r)" [class.sel]="selected()?.seq === r.seq" tabindex="0" (keydown.enter)="select(r)">
+              <td class="t">{{ time(r.timestamp_millis) }}</td>
+              <td><svp-session [id]="r.session_id" /></td>
+              <td class="req"><span class="method">{{ r.method }}</span> <span class="mono">{{ r.path }}</span></td>
+              <td class="mono stub">@if (r.matched_stub_id) { {{ r.matched_stub_id }} } @else { <span class="miss">no match</span> }</td>
+              <td class="num"><span class="status" [class]="statusClass(r.status_code)">{{ r.status_code }}</span></td>
+              <td class="num">{{ lat(r.engine_latency_ms) }}</td>
+              <td class="notes">
+                @if (r.state_mutated) { <span class="tag">wrote state</span> }
+                @if (r.fault_injected) { <span class="tag bad">injected fault</span> }
+                @if (r.injected_delay_ms > 0) { <span class="tag warn">+{{ r.injected_delay_ms }} ms delay</span> }
+              </td>
+            </tr>
+            @if (selected()?.seq === r.seq) {
+              <tr class="detail"><td colspan="7">
+                <div class="bodies">
+                  <div><h3>Request body</h3><pre class="json">{{ r.request_body == null ? '(none)' : pretty(r.request_body) }}</pre></div>
+                  <div><h3>Response body</h3><pre class="json">{{ r.response_body == null ? '(none)' : pretty(r.response_body) }}</pre></div>
+                </div>
+              </td></tr>
+            }
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</section>

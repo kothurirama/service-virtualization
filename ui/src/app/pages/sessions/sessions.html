@@ -1,0 +1,79 @@
+<section class="page">
+  <div class="page-head">
+    <div>
+      <h1>Sessions</h1>
+      <p>Each CI pipeline gets its own session. State written in one session is invisible to every other, and idle sessions expire on their own.</p>
+    </div>
+  </div>
+
+  <form class="panel create" (ngSubmit)="create()">
+    <label class="field">Session id <input type="text" class="mono" name="id" [(ngModel)]="newId" placeholder="leave empty to generate" /></label>
+    <label class="field">Idle timeout (seconds) <input type="number" name="ttl" min="0" [(ngModel)]="newTtl" /></label>
+    <label class="field">Labels <input type="text" name="labels" [(ngModel)]="newLabel" placeholder="pipeline=build-412, branch=main" /></label>
+    <button type="submit" class="primary">Create session</button>
+  </form>
+
+  @if (error()) { <p class="notice bad">{{ error() }}</p> }
+  @if (note()) { <p class="notice ok">{{ note() }}</p> }
+
+  <div class="split">
+    <div class="panel list">
+      @for (s of sessions(); track s.session_id) {
+        <button type="button" class="sess" [class.sel]="s.session_id === selectedId()" (click)="select(s)">
+          <svp-session [id]="s.session_id" />
+          <span class="nums">
+            <span>{{ s.request_count }} {{ s.request_count === 1 ? 'request' : 'requests' }}</span>
+            <span>{{ s.entry_count }} {{ s.entry_count === 1 ? 'entity' : 'entities' }}</span>
+          </span>
+          <span class="faint when">active {{ ago(s.last_access_at) }}{{ s.explicit ? '' : ', created on first call' }}</span>
+        </button>
+      } @empty {
+        <div class="empty">No sessions yet. Create one above, or send any virtual request with an <code>X-Session-Id</code> header.</div>
+      }
+    </div>
+
+    <div class="panel inspector">
+      @if (selected(); as s) {
+        <div class="ins-head">
+          <div>
+            <h2><svp-session [id]="s.session_id" /></h2>
+            <p class="muted small">
+              {{ ttlText(s.ttl_seconds) }}, {{ s.mutation_count }} state writes{{ labelList(s.labels) ? ', labels ' + labelList(s.labels) : '' }}
+            </p>
+          </div>
+          <div class="toolbar">
+            <button type="button" (click)="clearState(s.session_id)">Clear state</button>
+            <button type="button" class="danger" (click)="teardown(s.session_id)">Tear down</button>
+          </div>
+        </div>
+
+        @if (state(); as st) {
+          @if (st.entry_count === 0) {
+            <div class="empty">This session has no state yet. Writes such as <code>POST /virtual/api/v1/accounts</code> appear here.</div>
+          } @else {
+            <div class="tabs" role="tablist">
+              @for (c of st.collections | keyvalue; track c.key) {
+                <button type="button" role="tab" [attr.aria-selected]="openCollection() === c.key" [class.on]="openCollection() === c.key"
+                        (click)="openCollection.set(c.key)">{{ c.key }} <span class="faint">{{ (c.value | keyvalue).length }}</span></button>
+              }
+            </div>
+            @for (c of st.collections | keyvalue; track c.key) {
+              @if (openCollection() === c.key || !openCollection()) {
+                <div class="entities">
+                  @for (e of c.value | keyvalue; track e.key) {
+                    <details>
+                      <summary class="mono">{{ e.key }}</summary>
+                      <pre class="json">{{ pretty(e.value) }}</pre>
+                    </details>
+                  }
+                </div>
+              }
+            }
+          }
+        }
+      } @else {
+        <div class="empty">Select a session to inspect its state.</div>
+      }
+    </div>
+  </div>
+</section>

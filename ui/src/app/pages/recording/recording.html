@@ -1,0 +1,111 @@
+<section class="page">
+  <div class="page-head">
+    <div>
+      <h1>Recording</h1>
+      <p>Paste captured traffic. Card data, personal data and credentials are masked before anything is stored, then each exchange becomes a replayable stub. Anything the detector is unsure about waits for your approval.</p>
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="panel ingest">
+      <h2>Ingest traffic</h2>
+      <div class="row2">
+        <label class="field">Service name <input type="text" [(ngModel)]="serviceName" /></label>
+        <label class="check"><input type="checkbox" [(ngModel)]="autoPublish" /> Publish automatically when nothing needs review</label>
+      </div>
+      <label class="field">Recorded exchanges (JSON array)
+        <textarea rows="18" [(ngModel)]="logsText" spellcheck="false"></textarea>
+      </label>
+      @if (error()) { <p class="notice bad">{{ error() }}</p> }
+      <button type="button" class="primary" (click)="ingest()" [disabled]="busy()">Sanitize and generate stubs</button>
+
+      @if (configs().length) {
+        <h3 class="hist">Previous ingests</h3>
+        <ul class="history">
+          @for (c of configs(); track c.stub_config_id) {
+            <li>
+              <button type="button" [class.sel]="c.stub_config_id === selectedId()" (click)="selectedId.set(c.stub_config_id)">
+                <span class="mono">{{ c.stub_config_id }}</span>
+                <span class="pill" [class]="'pill ' + c.status">{{ statusLabel(c.status) }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <div class="panel result">
+      @if (selected(); as c) {
+        <div class="r-head">
+          <div>
+            <h2 class="mono">{{ c.stub_config_id }}</h2>
+            <p class="muted small">{{ c.sanitization_summary.logs_processed }} {{ c.sanitization_summary.logs_processed === 1 ? 'exchange' : 'exchanges' }}, generated {{ c.generated_at | date: 'mediumTime' }}. {{ c.status_reason }}</p>
+          </div>
+          <span [class]="'pill big ' + c.status">{{ statusLabel(c.status) }}</span>
+        </div>
+
+        <dl class="summary">
+          <div><dt>Fields inspected</dt><dd>{{ c.sanitization_summary.total_fields_inspected }}</dd></div>
+          <div><dt>Card data masked</dt><dd>{{ c.sanitization_summary.pci_fields_masked }}</dd></div>
+          <div><dt>Personal data masked</dt><dd>{{ c.sanitization_summary.pii_fields_masked }}</dd></div>
+          <div><dt>Credentials removed</dt><dd>{{ c.sanitization_summary.secret_fields_masked }}</dd></div>
+          <div><dt>Stubs generated</dt><dd>{{ c.sanitization_summary.stubs_generated }}</dd></div>
+        </dl>
+
+        @if (c.status === 'PENDING_REVIEW' || c.status === 'DRAFT') {
+          <div class="decide">
+            <button type="button" class="primary" (click)="approve(c.stub_config_id)">Approve and publish</button>
+            <button type="button" class="danger" (click)="reject(c.stub_config_id)">Reject</button>
+          </div>
+        }
+
+        @if (c.review_queue.length) {
+          <h3>Needs a human decision</h3>
+          <table class="t">
+            <thead><tr><th>Field</th><th>Why</th><th class="num">Confidence</th><th>Suggested</th></tr></thead>
+            <tbody>
+              @for (r of c.review_queue; track $index) {
+                <tr class="review">
+                  <td class="mono">{{ r.field_name }}</td>
+                  <td>{{ r.reason }}</td>
+                  <td class="num">{{ r.confidence != null ? (r.confidence | number: '1.2-2') : '' }}</td>
+                  <td>{{ r.suggested_action === 'REDACT' ? 'Redact' : r.suggested_action === 'VERIFY_MASKING' ? 'Verify masking' : r.suggested_action === 'VERIFY' ? 'Verify' : 'Fix or discard' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        <h3>What was masked</h3>
+        @if (c.field_detections.length === 0) {
+          <p class="muted">Nothing sensitive was found.</p>
+        } @else {
+          <table class="t">
+            <thead><tr><th>Field</th><th>Detected as</th><th class="num">Confidence</th><th>Replaced with</th></tr></thead>
+            <tbody>
+              @for (d of c.field_detections; track $index) {
+                <tr>
+                  <td class="mono">{{ d.field }}</td>
+                  <td><span [class]="'cat ' + d.category">{{ typeLabel(d.type) }}</span></td>
+                  <td class="num">{{ d.confidence | number: '1.2-2' }}</td>
+                  <td class="mono masked">{{ d.masked_as }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        <h3>Generated stubs</h3>
+        @for (s of c.virtual_stubs; track s.stub_id) {
+          <details class="stub">
+            <summary><span class="method">{{ s.request_matcher.method }}</span> <span class="mono">{{ s.request_matcher.path }}</span>
+              <span class="faint mono">{{ s.stub_id }}</span></summary>
+            <pre class="json">{{ pretty(s) }}</pre>
+          </details>
+        }
+      } @else {
+        <div class="empty">Ingest a recording to see what was masked and which stubs it produced. The sample on the left includes a card number, an SSN, a bearer token and a cookie.</div>
+      }
+    </div>
+  </div>
+</section>

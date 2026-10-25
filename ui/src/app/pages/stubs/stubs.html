@@ -1,0 +1,87 @@
+<section class="page">
+  <div class="page-head">
+    <div>
+      <h1>Stubs</h1>
+      <p>Rules that decide how each virtual endpoint answers. Changes go live on the next request; disabled stubs stay saved but never match.</p>
+    </div>
+    <button type="button" class="primary" (click)="create()">New stub</button>
+  </div>
+
+  <div class="split">
+    <div class="list-col">
+      <div class="toolbar">
+        <input type="search" class="grow" [ngModel]="query()" (ngModelChange)="search($event)"
+               placeholder="Search id, route, tag" aria-label="Search stubs" />
+      </div>
+      <div class="seg" role="radiogroup" aria-label="Source">
+        @for (s of sources; track s.value) {
+          <button type="button" role="radio" [attr.aria-checked]="source() === s.value" [class.on]="source() === s.value"
+                  (click)="filterSource(s.value)">{{ s.label }}</button>
+        }
+      </div>
+      <p class="faint small">{{ counts().enabled }} enabled of {{ counts().total }} shown</p>
+      @if (loadError()) { <p class="notice bad">{{ loadError() }}</p> }
+
+      <ul class="stub-list">
+        @for (v of stubs(); track v.stub.stub_id) {
+          <li [class.sel]="selectedId() === v.stub.stub_id" [class.off]="!v.stub.enabled">
+            <label class="switch" [attr.title]="v.stub.enabled ? 'Disable' : 'Enable'">
+              <input type="checkbox" [checked]="v.stub.enabled" (change)="toggle(v, $any($event.target).checked)"
+                     [attr.aria-label]="(v.stub.enabled ? 'Disable ' : 'Enable ') + v.stub.stub_id" />
+              <span></span>
+            </label>
+            <button type="button" class="row" (click)="open(v)">
+              <span class="route"><span class="method">{{ v.route.split(' ')[0] }}</span> <span class="mono">{{ v.route.split(' ')[1] }}</span></span>
+              <span class="meta">
+                <span class="mono id">{{ v.stub.stub_id }}</span>
+                <span class="faint">{{ v.hit_count }} {{ v.hit_count === 1 ? 'hit' : 'hits' }}</span>
+              </span>
+            </button>
+          </li>
+        } @empty {
+          <li class="empty">No stubs match. Clear the search or create one.</li>
+        }
+      </ul>
+    </div>
+
+    <div class="panel editor">
+      @if (selected() || isNew()) {
+        <div class="ed-head">
+          <div>
+            <h2>{{ isNew() ? 'New stub' : selected()!.stub.stub_id }}</h2>
+            @if (selected(); as s) {
+              <p class="muted small">
+                {{ s.stub.source.toLowerCase() }} stub, priority {{ s.stub.priority }},
+                last matched {{ ago(s.last_hit_at) }}, updated {{ ago(s.updated_at) }}
+              </p>
+            } @else {
+              <p class="muted small">Edit the JSON, validate, then save. Saving an existing id replaces that stub.</p>
+            }
+          </div>
+          @if (selected(); as s) {
+            <button type="button" class="danger" (click)="remove(s)">Delete</button>
+          }
+        </div>
+        <textarea rows="24" [(ngModel)]="editorText" spellcheck="false" aria-label="Stub definition JSON"></textarea>
+        @if (editorError()) { <p class="notice bad">{{ editorError() }}</p> }
+        @if (editorNote()) { <p class="notice ok">{{ editorNote() }}</p> }
+        <div class="toolbar">
+          <button type="button" (click)="validate()">Validate</button>
+          <button type="button" class="primary" (click)="save()" [disabled]="busy()">{{ isNew() ? 'Create stub' : 'Save changes' }}</button>
+        </div>
+        <details class="help">
+          <summary>Template and matcher reference</summary>
+          <ul>
+            @for (line of help; track $index) {
+              <li>@for (part of line; track $index) {@if (part.c) {<code>{{ part.c }}</code>} @else {<span>{{ part.t }}</span>}}</li>
+            }
+          </ul>
+        </details>
+      } @else {
+        <div class="empty">
+          <p>Select a stub to inspect or edit it, or create a new one.</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,24 @@
+.create { display: grid; grid-template-columns: 1.2fr 0.8fr 1.4fr auto; gap: 0.9rem; align-items: end; }
+.small { font-size: 0.84rem; }
+.list { padding: 0.35rem; display: grid; gap: 0.15rem; max-height: calc(100vh - 21rem); overflow: auto; }
+.sess { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.15rem 1rem; text-align: left; border: 0;
+  background: transparent; padding: 0.6rem 0.7rem; border-radius: var(--radius); }
+.sess:hover { background: var(--sunken); }
+.sess.sel { background: var(--accent-soft); }
+.nums { display: flex; gap: 0.9rem; font-size: 0.8rem; color: var(--slate); justify-self: end; }
+.when { grid-column: 1 / -1; font-size: 0.78rem; }
+.inspector { display: grid; gap: 0.9rem; position: sticky; top: 4.6rem; }
+.ins-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
+.ins-head h2 { font-size: 1.05rem; }
+.tabs { display: flex; gap: 0.3rem; flex-wrap: wrap; border-bottom: 1px solid var(--rule); }
+.tabs button { border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; color: var(--slate);
+  padding: 0.35rem 0.6rem; font-family: var(--mono); font-size: 0.84rem; }
+.tabs button.on { color: var(--ink); border-bottom-color: var(--accent); }
+.entities { display: grid; gap: 0.35rem; max-height: calc(100vh - 24rem); overflow: auto; }
+.entities details { border: 1px solid var(--rule); border-radius: var(--radius); padding: 0.4rem 0.6rem; }
+.entities summary { cursor: pointer; }
+.entities pre { margin-top: 0.4rem; }
+@media (max-width: 960px) {
+  .create { grid-template-columns: 1fr; }
+  .inspector { position: static; }
+}

@@ -1,0 +1,98 @@
+<section class="page">
+  <div class="page-head">
+    <div>
+      <h1>Drift</h1>
+      <p>Make virtual services behave like a struggling downstream: add latency and jitter, or fail a share of requests. A route override replaces the global profile for that route.</p>
+    </div>
+    <button type="button" class="quiet" (click)="reset()">Remove all drift</button>
+  </div>
+
+  @if (error()) { <p class="notice bad">{{ error() }}</p> }
+  @if (note()) { <p class="notice ok">{{ note() }}</p> }
+
+  <ng-template #controls let-d>
+    <div class="controls">
+      <label class="toggle-line">
+        <span class="switch"><input type="checkbox" [(ngModel)]="d.enabled" [ngModelOptions]="{standalone: true}" /><span></span></span>
+        Enabled
+      </label>
+      <label class="slider">
+        <span>Base latency <strong>{{ d.latency }} ms</strong></span>
+        <input type="range" min="0" max="5000" step="10" [(ngModel)]="d.latency" [ngModelOptions]="{standalone: true}" />
+      </label>
+      <label class="slider">
+        <span>Jitter <strong>{{ d.jitter }} ms</strong></span>
+        <input type="range" min="0" max="2000" step="5" [(ngModel)]="d.jitter" [ngModelOptions]="{standalone: true}" />
+      </label>
+      <div class="slider">
+        <span>Distribution</span>
+        <div class="seg" role="radiogroup" aria-label="Latency distribution">
+          @for (x of distributions; track x.value) {
+            <button type="button" role="radio" [attr.aria-checked]="d.distribution === x.value" [class.on]="d.distribution === x.value"
+                    (click)="d.distribution = x.value">{{ x.label }}</button>
+          }
+        </div>
+      </div>
+      <label class="slider">
+        <span>Failure rate <strong>{{ d.errorPct }}%</strong></span>
+        <input type="range" min="0" max="100" step="0.5" [(ngModel)]="d.errorPct" [ngModelOptions]="{standalone: true}" />
+      </label>
+      <label class="slider">
+        <span>Failure status</span>
+        <select [(ngModel)]="d.status" [ngModelOptions]="{standalone: true}">
+          @for (s of statuses; track s) { <option [ngValue]="s">{{ s }}</option> }
+        </select>
+      </label>
+    </div>
+    <p class="describe">{{ describe(d) }}</p>
+  </ng-template>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>Global profile</h2>
+      <p class="muted small">Applies to every matched request on a route without its own override.</p>
+      <ng-container *ngTemplateOutlet="controls; context: { $implicit: global }" />
+      <button type="button" class="primary" (click)="saveGlobal()">Apply global profile</button>
+    </div>
+
+    <div class="panel">
+      <h2>Route override</h2>
+      <label class="field">Route
+        <select class="mono" [(ngModel)]="route">
+          @for (r of view()?.known_routes ?? []; track r) { <option [value]="r">{{ r }}</option> }
+        </select>
+      </label>
+      <ng-container *ngTemplateOutlet="controls; context: { $implicit: routeDraft }" />
+      <button type="button" class="primary" (click)="saveRoute()" [disabled]="!route">Save override</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Active route overrides</h2>
+    @if (view(); as v) {
+      @if ((v.routes | keyvalue).length === 0) {
+        <p class="empty">No overrides. Every route follows the global profile.</p>
+      } @else {
+        <table class="overrides">
+          <thead><tr><th>On</th><th>Route</th><th>Behaviour</th><th></th></tr></thead>
+          <tbody>
+            @for (r of v.routes | keyvalue; track r.key) {
+              <tr>
+                <td>
+                  <label class="switch"><input type="checkbox" [checked]="r.value.enabled" (change)="toggleRoute(r.key, r.value, $any($event.target).checked)"
+                         [attr.aria-label]="'Toggle override for ' + r.key" /><span></span></label>
+                </td>
+                <td class="mono">{{ r.key }}</td>
+                <td>{{ summary(r.value) }}</td>
+                <td class="actions">
+                  <button type="button" class="quiet" (click)="editRoute(r.key, r.value)">Edit</button>
+                  <button type="button" class="quiet danger" (click)="removeRoute(r.key)">Remove</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    }
+  </div>
+</section>

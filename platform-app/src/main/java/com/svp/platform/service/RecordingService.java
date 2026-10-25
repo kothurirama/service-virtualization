@@ -59,9 +59,9 @@ public class RecordingService {
         RecordingView view;
         if (config.sanitizationSummary().requiresHumanReview()) {
             view = new RecordingView(config, Status.PENDING_REVIEW, List.of(),
-                    config.reviewQueue().size() + " item(s) need human review before publication", null);
+                    config.reviewQueue().size() + (config.reviewQueue().size() == 1 ? " item needs" : " items need") + " human review before publication.", null);
         } else if (!autoPublish) {
-            view = new RecordingView(config, Status.DRAFT, List.of(), "auto_publish was false", null);
+            view = new RecordingView(config, Status.DRAFT, List.of(), "Held as a draft because auto_publish was false.", null);
         } else {
             String conflict = conflictWithManualStub(config);
             view = conflict != null
@@ -95,7 +95,7 @@ public class RecordingService {
         if (v.status() == Status.PUBLISHED) {
             throw new ConflictException("configuration '" + id + "' is already published; delete its stubs instead");
         }
-        RecordingView rejected = new RecordingView(v.config(), Status.REJECTED, List.of(), "rejected by reviewer",
+        RecordingView rejected = new RecordingView(v.config(), Status.REJECTED, List.of(), "Rejected by a reviewer.",
                 clock.instant());
         store.put(id, rejected);
         return rejected;
@@ -119,15 +119,15 @@ public class RecordingService {
         List<StubDefinition> stubs = config.virtualStubs();
         registry.upsertAll(stubs);
         return new RecordingView(config, Status.PUBLISHED, stubs.stream().map(StubDefinition::stubId).toList(),
-                "published " + stubs.size() + " stub(s)", clock.instant());
+                "Published " + stubs.size() + (stubs.size() == 1 ? " stub." : " stubs."), clock.instant());
     }
 
     private String conflictWithManualStub(StubConfig config) {
         for (StubDefinition s : config.virtualStubs()) {
             var existing = registry.get(s.stubId());
             if (existing.isPresent() && existing.get().definition().source() != StubSource.RECORDED) {
-                return "stub id '" + s.stubId() + "' belongs to a " + existing.get().definition().source()
-                        + " stub; recorded stubs never overwrite it";
+                return "Stub id '" + s.stubId() + "' belongs to a " + existing.get().definition().source().name().toLowerCase()
+                        + " stub; recorded stubs never overwrite it.";
             }
         }
         return null;

@@ -1,0 +1,33 @@
+.composer { display: grid; gap: 0.8rem; }
+.c-line { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.c-line .path { flex: 1 1 18rem; }
+.c-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+.c-result { display: grid; gap: 0.5rem; }
+.c-result p { display: flex; gap: 0.45rem; align-items: baseline; flex-wrap: wrap; }
+.field.inline { display: flex; align-items: center; gap: 0.5rem; }
+.count { margin-left: auto; font-size: 0.85rem; }
+.ledger-wrap { padding: 0; overflow-x: auto; }
+.ledger { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.ledger th { text-align: left; font-weight: 500; color: var(--slate); font-size: 0.8rem; padding: 0.55rem 0.8rem;
+  border-bottom: 1px solid var(--rule); position: sticky; top: 0; background: var(--surface); white-space: nowrap; }
+.ledger td { padding: 0.45rem 0.8rem; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+.ledger tbody tr:not(.detail) { cursor: pointer; }
+.ledger tbody tr:not(.detail):hover { background: var(--sunken); }
+.ledger tr.sel { background: var(--accent-soft); }
+.ledger .num { text-align: right; white-space: nowrap; }
+.ledger .t { font-family: var(--mono); font-size: 0.78rem; color: var(--slate); white-space: nowrap; }
+.ledger .req { max-width: 26rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ledger .stub { font-size: 0.8rem; white-space: nowrap; }
+.miss { color: var(--bad); font-weight: 500; }
+.notes { white-space: nowrap; }
+.tag { display: inline-block; font-size: 0.74rem; padding: 0.05rem 0.45rem; border-radius: 1rem; background: var(--accent-soft);
+  color: var(--accent); margin-right: 0.3rem; }
+.tag.bad { background: var(--bad-soft); color: var(--bad); }
+.tag.warn { background: var(--warn-soft); color: var(--warn); }
+.detail td { background: var(--sunken); }
+.bodies { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 0.4rem 0; }
+.bodies h3 { margin-bottom: 0.4rem; font-weight: 500; color: var(--slate); }
+.bodies pre { background: var(--surface); max-height: 18rem; }
+@media (max-width: 960px) {
+  .c-grid, .bodies { grid-template-columns: 1fr; }
+}

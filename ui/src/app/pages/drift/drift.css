@@ -1,0 +1,19 @@
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; align-items: start; }
+.grid .panel { display: grid; gap: 0.9rem; }
+.small { font-size: 0.84rem; margin-top: -0.5rem; }
+.controls { display: grid; gap: 0.9rem; }
+.toggle-line { display: flex; align-items: center; gap: 0.6rem; font-weight: 500; }
+.slider { display: grid; gap: 0.35rem; font-size: 0.88rem; color: var(--slate); }
+.slider strong { color: var(--ink); font-weight: 600; margin-left: 0.3rem; }
+input[type='range'] { width: 100%; accent-color: var(--accent); }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; width: fit-content; }
+.seg button { border: 0; border-radius: 0; padding: 0.3rem 0.8rem; background: var(--surface); color: var(--slate); }
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button.on { background: var(--accent-soft); color: var(--ink); }
+.describe { background: var(--sunken); border-left: 3px solid var(--warn); padding: 0.6rem 0.8rem; border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 0.9rem; }
+.overrides { width: 100%; border-collapse: collapse; margin-top: 0.75rem; font-size: 0.88rem; }
+.overrides th { text-align: left; font-weight: 500; color: var(--slate); font-size: 0.8rem; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--rule); }
+.overrides td { padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+.actions { text-align: right; white-space: nowrap; }
+@media (max-width: 960px) { .grid { grid-template-columns: 1fr; } }
