@@ -15,6 +15,12 @@
     <description>Low-latency stub matching engine, template renderer, drift policy and session-isolated state store.
         Framework-free: depends only on Jackson.</description>
 
+    <properties>
+        <skipBenchmarks>false</skipBenchmarks>
+        <benchmark.gc>-XX:+UseZGC -XX:+ZGenerational</benchmark.gc>
+        <benchmark.jvmArgs/>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -39,6 +45,30 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-test</id>
+                        <configuration>
+                            <excludedGroups>benchmark</excludedGroups>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- latency benchmark: separate JVM, no coverage agent, fixed heap -->
+                        <id>benchmark</id>
+                        <phase>test</phase>
+                        <goals><goal>test</goal></goals>
+                        <configuration>
+                            <skip>${skipBenchmarks}</skip>
+                            <groups>benchmark</groups>
+                            <argLine>-Xms1g -Xmx1g ${benchmark.gc} -Xshare:off ${benchmark.jvmArgs}</argLine>
+                            <reportsDirectory>${project.build.directory}/surefire-reports-benchmark</reportsDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <!-- share test fixtures (scenario loader, seed stubs) with the other modules -->
                 <groupId>org.apache.maven.plugins</groupId>
