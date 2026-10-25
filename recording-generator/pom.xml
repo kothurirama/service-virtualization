@@ -14,12 +14,23 @@
     <name>recording-generator</name>
     <description>PCI/PII sanitisation pipeline and stub synthesis from recorded traffic. Framework-free.</description>
 
+    <properties>
+        <skipBenchmarks>false</skipBenchmarks>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.svp</groupId>
             <artifactId>stub-engine</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.svp</groupId>
+            <artifactId>stub-engine</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -31,4 +42,32 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-test</id>
+                        <configuration>
+                            <excludedGroups>benchmark</excludedGroups>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>benchmark</id>
+                        <phase>test</phase>
+                        <goals><goal>test</goal></goals>
+                        <configuration>
+                            <skip>${skipBenchmarks}</skip>
+                            <groups>benchmark</groups>
+                            <argLine>-Xms512m -Xmx512m -XX:+UseZGC -XX:+ZGenerational -Xshare:off</argLine>
+                            <reportsDirectory>${project.build.directory}/surefire-reports-benchmark</reportsDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
