@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: service-virtualization-platform
+  threads:
+    virtual:
+      enabled: true          # one cheap virtual thread per request; injected latency just parks it
+  main:
+    banner-mode: off
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+    mapper:
+      accept-case-insensitive-enums: true
+
+server:
+  port: ${PORT:8080}
+  tomcat:
+    max-keep-alive-requests: -1   # CI clients and load generators reuse connections
+    keep-alive-timeout: 60s
+    max-connections: 20000
+    accept-count: 2000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+svp:
+  sessions:
+    default-ttl: 30m
+    max-sessions: 10000
+    max-entries-per-session: 50000
+    sweep-interval: 30s
+  traffic:
+    capacity: 2048
+  seed:
+    enabled: true
+    location: seed/seed-stubs.json
+  warmup:
+    requests: 10000
+  recording:
+    max-stored-configs: 200
+
+logging:
+  level:
+    root: INFO
