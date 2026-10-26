@@ -336,6 +336,12 @@ public final class SensitiveDataSanitizer {
             if (h == SensitiveType.SSN && len == 9) {
                 return found(SensitiveType.SSN, 0.97, "field_name_9_digits", "SSN field");
             }
+            if (h == null && len == 9 && original instanceof String && digits.equals(s.trim()) && !hint.identifierLike()
+                    && ValueDetectors.validSsn(digits)) {
+                // weak signal (shape only): fail closed - mask, and hold the stub for a human to confirm
+                return found(SensitiveType.SSN, 0.6, "ssn_digits_ssa_rules",
+                        "unformatted 9-digit value passing SSA rules under a neutral field name");
+            }
             if (h == SensitiveType.CVV && (len == 3 || len == 4)) {
                 return found(SensitiveType.CVV, 0.97, "field_name_3_4_digits", "card verification value");
             }

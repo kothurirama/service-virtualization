@@ -1,0 +1,30 @@
+{
+  "error_rate_0.05" : {
+    "configured" : 0.05,
+    "observed" : 0.04975,
+    "samples" : 20000
+  },
+  "error_rate_0.1" : {
+    "configured" : 0.1,
+    "observed" : 0.099,
+    "samples" : 20000
+  },
+  "error_rate_0.5" : {
+    "configured" : 0.5,
+    "observed" : 0.50515,
+    "samples" : 20000
+  },
+  "engine_error_rate_0.10" : {
+    "observed" : 0.1005,
+    "samples" : 20000
+  },
+  "uniform_100_pm_20" : {
+    "mean" : 99.83815,
+    "min" : 80,
+    "max" : 120
+  },
+  "gaussian_50_sd_10" : {
+    "stddev" : 10.062664456295854,
+    "mean" : 49.9602
+  }
+}

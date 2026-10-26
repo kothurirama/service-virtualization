@@ -88,6 +88,20 @@ class SensitiveDataSanitizerTest {
     }
 
     @Test
+    void unformattedSsnShapeUnderANeutralKeyIsMaskedAndHeldForReview() {
+        var r = sanitizer.inspect(Map.of("value", "536904399", "invoice_no", "123456789", "units", 536904399));
+        assertThat(r.detections()).singleElement().satisfies(d -> {
+            assertThat(d.field()).endsWith("value");
+            assertThat(d.type()).isEqualTo(SensitiveType.SSN);
+            assertThat(d.confidence()).isLessThan(SensitiveDataSanitizer.AUTO_THRESHOLD);
+        });
+        Map<?, ?> out = (Map<?, ?>) r.sanitized();
+        assertThat(out.get("value")).isNotEqualTo("536904399");
+        assertThat(out.get("invoice_no")).isEqualTo("123456789"); // identifier-like key: left alone
+        assertThat(out.get("units")).isEqualTo(536904399);        // numbers are quantities, not ids
+    }
+
+    @Test
     void cardExpiryIsOnlyMaskedWhenThePanIsPresent() {
         var alone = sanitizer.inspect(Map.of("expiry", "12/28"));
         assertThat(alone.detections()).isEmpty();

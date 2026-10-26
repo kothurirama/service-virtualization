@@ -1,0 +1,292 @@
+{
+  "scenarios" : 30,
+  "passed" : 30,
+  "mean_engine_latency_ms" : 0.03253333333333334,
+  "max_engine_latency_ms" : 0.119,
+  "by_category" : {
+    "fallback" : "6/6",
+    "header_matching" : "3/3",
+    "jsonpath" : "7/7",
+    "path_matching" : "5/5",
+    "query_matching" : "1/1",
+    "session_isolation" : "3/3",
+    "state_mutation" : "5/5"
+  },
+  "results" : [ {
+    "id" : "S01",
+    "category" : "path_matching",
+    "name" : "Static path + JSONPath body match creates an account (worked example)",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.119,
+    "matched_stub_id" : "stub_account_create_v1",
+    "status_code" : 201
+  }, {
+    "id" : "S02",
+    "category" : "state_mutation",
+    "name" : "Client-supplied id is honoured instead of a generated one",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.051,
+    "matched_stub_id" : "stub_account_create_v1",
+    "status_code" : 201
+  }, {
+    "id" : "S03",
+    "category" : "state_mutation",
+    "name" : "Read-after-write through a path variable in the same session",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.015,
+    "matched_stub_id" : "stub_account_get_v1",
+    "status_code" : 200
+  }, {
+    "id" : "S04",
+    "category" : "path_matching",
+    "name" : "Nested path with two variables, both echoed into the response",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.02,
+    "matched_stub_id" : "stub_customer_account_v1",
+    "status_code" : 200
+  }, {
+    "id" : "S05",
+    "category" : "path_matching",
+    "name" : "Literal segment beats a path variable at the same depth",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.032,
+    "matched_stub_id" : "stub_account_summary_v1",
+    "status_code" : 200
+  }, {
+    "id" : "S06",
+    "category" : "fallback",
+    "name" : "Known path but unsupported method returns NO_MATCHING_STUB",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.016,
+    "status_code" : 404
+  }, {
+    "id" : "S07",
+    "category" : "path_matching",
+    "name" : "Tail wildcard (**) matches any method and depth, exposes the tail",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.053,
+    "matched_stub_id" : "stub_legacy_gone_v1",
+    "status_code" : 410
+  }, {
+    "id" : "S08",
+    "category" : "path_matching",
+    "name" : "Single-segment wildcard, trailing slash tolerated",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.012,
+    "matched_stub_id" : "stub_fx_rate_v1",
+    "status_code" : 200
+  }, {
+    "id" : "S09",
+    "category" : "jsonpath",
+    "name" : "Multi-field JSONPath (nested) + header constraint; payment stored in session",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.094,
+    "matched_stub_id" : "stub_payment_visa_v1",
+    "status_code" : 200
+  }, {
+    "id" : "S10",
+    "category" : "header_matching",
+    "name" : "Content-Type with charset parameter still satisfies the media-type constraint",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.088,
+    "matched_stub_id" : "stub_payment_visa_v1",
+    "status_code" : 200
+  }, {
+    "id" : "S11",
+    "category" : "fallback",
+    "name" : "Header constraint fails, request falls through to the lower-priority catch-all",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.036,
+    "matched_stub_id" : "stub_payment_generic_v1",
+    "status_code" : 200
+  }, {
+    "id" : "S12",
+    "category" : "jsonpath",
+    "name" : "Regex operator on a body field",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.026,
+    "matched_stub_id" : "stub_payment_high_risk_v1",
+    "status_code" : 202
+  }, {
+    "id" : "S13",
+    "category" : "jsonpath",
+    "name" : "Numeric comparison (gt) outranks an otherwise matching lower-priority stub",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.021,
+    "matched_stub_id" : "stub_payment_large_amount_v1",
+    "status_code" : 202
+  }, {
+    "id" : "S14",
+    "category" : "jsonpath",
+    "name" : "Deep scan ($..country) finds a sanctioned country at any depth",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.017,
+    "matched_stub_id" : "stub_payment_sanctioned_v1",
+    "status_code" : 403
+  }, {
+    "id" : "S15",
+    "category" : "jsonpath",
+    "name" : "exists:false matches a payload missing a required field",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.022,
+    "matched_stub_id" : "stub_payment_missing_merchant_v1",
+    "status_code" : 400
+  }, {
+    "id" : "S16",
+    "category" : "jsonpath",
+    "name" : "Array index JSONPath ($.items[0].sku)",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.065,
+    "matched_stub_id" : "stub_order_premium_v1",
+    "status_code" : 201
+  }, {
+    "id" : "S17",
+    "category" : "jsonpath",
+    "name" : "Wildcard array JSONPath ($.items[*].category) matches if any element matches",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.017,
+    "matched_stub_id" : "stub_order_restricted_v1",
+    "status_code" : 422
+  }, {
+    "id" : "S18",
+    "category" : "fallback",
+    "name" : "Unknown route returns NO_MATCHING_STUB, never a 500",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.014,
+    "status_code" : 404
+  }, {
+    "id" : "S19",
+    "category" : "header_matching",
+    "name" : "Header regex: bearer token present",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.016,
+    "matched_stub_id" : "stub_profile_authorized_v1",
+    "status_code" : 200
+  }, {
+    "id" : "S20",
+    "category" : "fallback",
+    "name" : "Header absent: falls back to the 401 stub",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.015,
+    "matched_stub_id" : "stub_profile_unauthorized_v1",
+    "status_code" : 401
+  }, {
+    "id" : "S21",
+    "category" : "query_matching",
+    "name" : "Query parameter constraint taken from the path's query string",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.063,
+    "matched_stub_id" : "stub_txn_pending_v1",
+    "status_code" : 200
+  }, {
+    "id" : "S22",
+    "category" : "fallback",
+    "name" : "Different query value falls back, fallback template uses ?: default",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.027,
+    "matched_stub_id" : "stub_txn_list_v1",
+    "status_code" : 200
+  }, {
+    "id" : "S23",
+    "category" : "header_matching",
+    "name" : "Header names are case-insensitive",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.016,
+    "matched_stub_id" : "stub_offers_mobile_v1",
+    "status_code" : 200
+  }, {
+    "id" : "S24",
+    "category" : "fallback",
+    "name" : "JSONPath constraint fails (EUR), rejected by fallback stub without mutating state",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.02,
+    "matched_stub_id" : "stub_account_create_rejected_v1",
+    "status_code" : 422
+  }, {
+    "id" : "S25",
+    "category" : "state_mutation",
+    "name" : "PUT merges a partial update into existing state",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.027,
+    "matched_stub_id" : "stub_account_update_v1",
+    "status_code" : 200
+  }, {
+    "id" : "S26",
+    "category" : "state_mutation",
+    "name" : "DELETE removes state; a later GET in the same session is 404",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.022,
+    "matched_stub_id" : "stub_account_get_v1",
+    "status_code" : 404
+  }, {
+    "id" : "S27",
+    "category" : "state_mutation",
+    "name" : "LIST returns every entity created in the session",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.036,
+    "matched_stub_id" : "stub_account_list_v1",
+    "status_code" : 200
+  }, {
+    "id" : "S28",
+    "category" : "session_isolation",
+    "name" : "Session B cannot read an entity created in session A",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.009,
+    "matched_stub_id" : "stub_account_get_v1",
+    "status_code" : 404
+  }, {
+    "id" : "S29",
+    "category" : "session_isolation",
+    "name" : "Same entity id written by two sessions: each reads only its own value",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.002,
+    "matched_stub_id" : "stub_account_get_v1",
+    "status_code" : 200
+  }, {
+    "id" : "S30",
+    "category" : "session_isolation",
+    "name" : "Generated ids are per session: a second pipeline also starts at ACC-1001",
+    "passed" : true,
+    "failures" : [ ],
+    "engine_latency_ms" : 0.005,
+    "matched_stub_id" : "stub_account_create_v1",
+    "status_code" : 201
+  } ],
+  "hardware" : {
+    "available_processors" : 2,
+    "max_heap_mb" : 1496,
+    "java_version" : "21.0.12.1",
+    "java_vm" : "OpenJDK 64-Bit Server VM",
+    "os" : "Linux amd64",
+    "jvm_args" : [ "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts", "-Djavax.net.ssl.trustStoreType=JKS", "-Dhttps.proxyHost=127.0.0.1", "-Dhttps.proxyPort=40621", "-Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local", "-Djdk.http.auth.tunneling.disabledSchemes=", "-Djdk.http.auth.proxying.disabledSchemes=", "-XX:+EnableDynamicAgentLoading", "-Xshare:off" ]
+  }
+}

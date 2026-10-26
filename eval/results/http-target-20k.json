@@ -1,0 +1,46 @@
+{
+  "target_rps": 20000,
+  "achieved_rps": 15728.617,
+  "requests": 943810,
+  "duration_s": 60.006,
+  "connections": 64,
+  "sessions": 64,
+  "unexpected_status": 0,
+  "io_errors": 0,
+  "client_latency_ms": {
+    "max": 19757.167,
+    "p99": 17268.731,
+    "p50": 6197.346,
+    "p95": 14885.566
+  },
+  "engine_latency_ms": {
+    "p99": 0.048,
+    "max": 8.175,
+    "p95": 0.011,
+    "p50": 0.003,
+    "p999": 0.319
+  },
+  "engine_sub_10ms_pass_rate": 1.0,
+  "status_counts": {
+    "200": 604409,
+    "201": 282622,
+    "204": 11158,
+    "404": 45621
+  },
+  "op_counts": {
+    "create_account": 235548,
+    "delete_account": 28378,
+    "get_account": 471637,
+    "header_regex": 37939,
+    "merge_account": 66473,
+    "no_match": 28401,
+    "order_jsonpath": 47074,
+    "query_match": 28360
+  },
+  "load_generator_cpu_share": 0.291,
+  "machine": {
+    "os": "Linux amd64",
+    "available_processors": 2,
+    "java": "21.0.12.1"
+  }
+}

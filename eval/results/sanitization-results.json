@@ -1,0 +1,43 @@
+{
+  "records" : 40,
+  "fields_evaluated" : 392,
+  "labelled_sensitive_fields" : 77,
+  "true_positives" : 77,
+  "false_positives" : 0,
+  "false_negatives" : 0,
+  "precision" : 1.0,
+  "recall" : 1.0,
+  "by_category" : {
+    "PCI" : {
+      "labelled" : 21,
+      "true_positives" : 21,
+      "false_positives" : 0,
+      "recall" : 1.0,
+      "precision" : 1.0
+    },
+    "PII" : {
+      "labelled" : 30,
+      "true_positives" : 30,
+      "false_positives" : 0,
+      "recall" : 1.0,
+      "precision" : 1.0
+    },
+    "PII_CRITICAL" : {
+      "labelled" : 7,
+      "true_positives" : 7,
+      "false_positives" : 0,
+      "recall" : 1.0,
+      "precision" : 1.0
+    },
+    "SECRET" : {
+      "labelled" : 19,
+      "true_positives" : 19,
+      "false_positives" : 0,
+      "recall" : 1.0,
+      "precision" : 1.0
+    }
+  },
+  "false_negative_fields" : [ ],
+  "false_positive_fields" : [ ],
+  "leaks" : [ ]
+}
