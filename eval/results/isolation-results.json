@@ -5,7 +5,7 @@
   "operations" : 51200,
   "violations" : 0,
   "first_violations" : [ ],
-  "elapsed_s" : 0.400070106,
+  "elapsed_s" : 0.318114552,
   "hardware" : {
     "available_processors" : 2,
     "max_heap_mb" : 1496,

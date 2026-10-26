@@ -1,14 +1,14 @@
 {
   "logs" : 100000,
   "avg_log_bytes" : 1574.975,
-  "sanitize_logs_per_sec_single_thread" : 25814.820071410137,
-  "sanitize_and_generate_logs_per_sec_single_thread" : 8276.06270698063,
+  "sanitize_logs_per_sec_single_thread" : 33884.773206309,
+  "sanitize_and_generate_logs_per_sec_single_thread" : 11432.543407729607,
   "hardware" : {
     "available_processors" : 2,
     "max_heap_mb" : 512,
     "java_version" : "21.0.12.1",
     "java_vm" : "OpenJDK 64-Bit Server VM",
     "os" : "Linux amd64",
-    "jvm_args" : [ "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts", "-Djavax.net.ssl.trustStoreType=JKS", "-Dhttps.proxyHost=127.0.0.1", "-Dhttps.proxyPort=41737", "-Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local", "-Djdk.http.auth.tunneling.disabledSchemes=", "-Djdk.http.auth.proxying.disabledSchemes=", "-Xms512m", "-Xmx512m", "-XX:+UseZGC", "-XX:+ZGenerational", "-Xshare:off" ]
+    "jvm_args" : [ "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts", "-Djavax.net.ssl.trustStoreType=JKS", "-Dhttps.proxyHost=127.0.0.1", "-Dhttps.proxyPort=40621", "-Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local", "-Djdk.http.auth.tunneling.disabledSchemes=", "-Djdk.http.auth.proxying.disabledSchemes=", "-Xms512m", "-Xmx512m", "-XX:+UseZGC", "-XX:+ZGenerational", "-Xshare:off" ]
   }
 }

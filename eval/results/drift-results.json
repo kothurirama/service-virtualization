@@ -1,30 +1,30 @@
 {
   "error_rate_0.05" : {
-    "configured" : 0.05,
+    "samples" : 20000,
     "observed" : 0.04975,
-    "samples" : 20000
+    "configured" : 0.05
   },
   "error_rate_0.1" : {
-    "configured" : 0.1,
+    "samples" : 20000,
     "observed" : 0.099,
-    "samples" : 20000
+    "configured" : 0.1
   },
   "error_rate_0.5" : {
-    "configured" : 0.5,
+    "samples" : 20000,
     "observed" : 0.50515,
-    "samples" : 20000
+    "configured" : 0.5
   },
   "engine_error_rate_0.10" : {
-    "observed" : 0.1005,
-    "samples" : 20000
+    "samples" : 20000,
+    "observed" : 0.1005
   },
   "uniform_100_pm_20" : {
-    "mean" : 99.83815,
+    "max" : 120,
     "min" : 80,
-    "max" : 120
+    "mean" : 99.83815
   },
   "gaussian_50_sd_10" : {
-    "stddev" : 10.062664456295854,
-    "mean" : 49.9602
+    "mean" : 49.9602,
+    "stddev" : 10.062664456295854
   }
 }

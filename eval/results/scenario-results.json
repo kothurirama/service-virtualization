@@ -1,8 +1,8 @@
 {
   "scenarios" : 30,
   "passed" : 30,
-  "mean_engine_latency_ms" : 0.03253333333333334,
-  "max_engine_latency_ms" : 0.119,
+  "mean_engine_latency_ms" : 0.038200000000000005,
+  "max_engine_latency_ms" : 0.135,
   "by_category" : {
     "fallback" : "6/6",
     "header_matching" : "3/3",
@@ -18,7 +18,7 @@
     "name" : "Static path + JSONPath body match creates an account (worked example)",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.119,
+    "engine_latency_ms" : 0.077,
     "matched_stub_id" : "stub_account_create_v1",
     "status_code" : 201
   }, {
@@ -27,7 +27,7 @@
     "name" : "Client-supplied id is honoured instead of a generated one",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.051,
+    "engine_latency_ms" : 0.056,
     "matched_stub_id" : "stub_account_create_v1",
     "status_code" : 201
   }, {
@@ -36,7 +36,7 @@
     "name" : "Read-after-write through a path variable in the same session",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.015,
+    "engine_latency_ms" : 0.013,
     "matched_stub_id" : "stub_account_get_v1",
     "status_code" : 200
   }, {
@@ -45,7 +45,7 @@
     "name" : "Nested path with two variables, both echoed into the response",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.02,
+    "engine_latency_ms" : 0.018,
     "matched_stub_id" : "stub_customer_account_v1",
     "status_code" : 200
   }, {
@@ -54,7 +54,7 @@
     "name" : "Literal segment beats a path variable at the same depth",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.032,
+    "engine_latency_ms" : 0.018,
     "matched_stub_id" : "stub_account_summary_v1",
     "status_code" : 200
   }, {
@@ -63,7 +63,7 @@
     "name" : "Known path but unsupported method returns NO_MATCHING_STUB",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.016,
+    "engine_latency_ms" : 0.022,
     "status_code" : 404
   }, {
     "id" : "S07",
@@ -71,7 +71,7 @@
     "name" : "Tail wildcard (**) matches any method and depth, exposes the tail",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.053,
+    "engine_latency_ms" : 0.026,
     "matched_stub_id" : "stub_legacy_gone_v1",
     "status_code" : 410
   }, {
@@ -80,7 +80,7 @@
     "name" : "Single-segment wildcard, trailing slash tolerated",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.012,
+    "engine_latency_ms" : 0.014,
     "matched_stub_id" : "stub_fx_rate_v1",
     "status_code" : 200
   }, {
@@ -89,7 +89,7 @@
     "name" : "Multi-field JSONPath (nested) + header constraint; payment stored in session",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.094,
+    "engine_latency_ms" : 0.135,
     "matched_stub_id" : "stub_payment_visa_v1",
     "status_code" : 200
   }, {
@@ -98,7 +98,7 @@
     "name" : "Content-Type with charset parameter still satisfies the media-type constraint",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.088,
+    "engine_latency_ms" : 0.123,
     "matched_stub_id" : "stub_payment_visa_v1",
     "status_code" : 200
   }, {
@@ -107,7 +107,7 @@
     "name" : "Header constraint fails, request falls through to the lower-priority catch-all",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.036,
+    "engine_latency_ms" : 0.083,
     "matched_stub_id" : "stub_payment_generic_v1",
     "status_code" : 200
   }, {
@@ -116,7 +116,7 @@
     "name" : "Regex operator on a body field",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.026,
+    "engine_latency_ms" : 0.041,
     "matched_stub_id" : "stub_payment_high_risk_v1",
     "status_code" : 202
   }, {
@@ -125,7 +125,7 @@
     "name" : "Numeric comparison (gt) outranks an otherwise matching lower-priority stub",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.021,
+    "engine_latency_ms" : 0.03,
     "matched_stub_id" : "stub_payment_large_amount_v1",
     "status_code" : 202
   }, {
@@ -134,7 +134,7 @@
     "name" : "Deep scan ($..country) finds a sanctioned country at any depth",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.017,
+    "engine_latency_ms" : 0.02,
     "matched_stub_id" : "stub_payment_sanctioned_v1",
     "status_code" : 403
   }, {
@@ -143,7 +143,7 @@
     "name" : "exists:false matches a payload missing a required field",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.022,
+    "engine_latency_ms" : 0.026,
     "matched_stub_id" : "stub_payment_missing_merchant_v1",
     "status_code" : 400
   }, {
@@ -152,7 +152,7 @@
     "name" : "Array index JSONPath ($.items[0].sku)",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.065,
+    "engine_latency_ms" : 0.049,
     "matched_stub_id" : "stub_order_premium_v1",
     "status_code" : 201
   }, {
@@ -170,7 +170,7 @@
     "name" : "Unknown route returns NO_MATCHING_STUB, never a 500",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.014,
+    "engine_latency_ms" : 0.035,
     "status_code" : 404
   }, {
     "id" : "S19",
@@ -178,7 +178,7 @@
     "name" : "Header regex: bearer token present",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.016,
+    "engine_latency_ms" : 0.018,
     "matched_stub_id" : "stub_profile_authorized_v1",
     "status_code" : 200
   }, {
@@ -187,7 +187,7 @@
     "name" : "Header absent: falls back to the 401 stub",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.015,
+    "engine_latency_ms" : 0.02,
     "matched_stub_id" : "stub_profile_unauthorized_v1",
     "status_code" : 401
   }, {
@@ -196,7 +196,7 @@
     "name" : "Query parameter constraint taken from the path's query string",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.063,
+    "engine_latency_ms" : 0.094,
     "matched_stub_id" : "stub_txn_pending_v1",
     "status_code" : 200
   }, {
@@ -205,7 +205,7 @@
     "name" : "Different query value falls back, fallback template uses ?: default",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.027,
+    "engine_latency_ms" : 0.033,
     "matched_stub_id" : "stub_txn_list_v1",
     "status_code" : 200
   }, {
@@ -223,7 +223,7 @@
     "name" : "JSONPath constraint fails (EUR), rejected by fallback stub without mutating state",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.02,
+    "engine_latency_ms" : 0.029,
     "matched_stub_id" : "stub_account_create_rejected_v1",
     "status_code" : 422
   }, {
@@ -232,7 +232,7 @@
     "name" : "PUT merges a partial update into existing state",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.027,
+    "engine_latency_ms" : 0.061,
     "matched_stub_id" : "stub_account_update_v1",
     "status_code" : 200
   }, {
@@ -241,7 +241,7 @@
     "name" : "DELETE removes state; a later GET in the same session is 404",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.022,
+    "engine_latency_ms" : 0.014,
     "matched_stub_id" : "stub_account_get_v1",
     "status_code" : 404
   }, {
@@ -250,7 +250,7 @@
     "name" : "LIST returns every entity created in the session",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.036,
+    "engine_latency_ms" : 0.026,
     "matched_stub_id" : "stub_account_list_v1",
     "status_code" : 200
   }, {
@@ -259,7 +259,7 @@
     "name" : "Session B cannot read an entity created in session A",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.009,
+    "engine_latency_ms" : 0.024,
     "matched_stub_id" : "stub_account_get_v1",
     "status_code" : 404
   }, {
@@ -268,7 +268,7 @@
     "name" : "Same entity id written by two sessions: each reads only its own value",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.002,
+    "engine_latency_ms" : 0.004,
     "matched_stub_id" : "stub_account_get_v1",
     "status_code" : 200
   }, {
@@ -277,7 +277,7 @@
     "name" : "Generated ids are per session: a second pipeline also starts at ACC-1001",
     "passed" : true,
     "failures" : [ ],
-    "engine_latency_ms" : 0.005,
+    "engine_latency_ms" : 0.004,
     "matched_stub_id" : "stub_account_create_v1",
     "status_code" : 201
   } ],
